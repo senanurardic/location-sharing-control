@@ -1,5 +1,5 @@
 // ============================
-// CALIBRATED MAP CONFIGURATION (ZOOM 16.0)
+// CALIBRATED MAP CONFIGURATION (ZOOM 13.0)
 // ============================
 const map = new maplibregl.Map({
     container: 'map',
@@ -29,7 +29,7 @@ map.on('style.load', () => {
 });
 
 // ============================
-// EXACT EXTRACTED KML COORDINATE NODES
+// EXACT EXTRACTED KML COORDINATE NODES (ORIJINAL MERKEZLER)
 // ============================
 const positions = {
     leftNode:  [9.203801, 45.483950], // Top-Left Vertex ("G") 
@@ -44,16 +44,19 @@ const people = [
     {
         id: "leftNode",
         markerType: "grey-letter-dot",
-        initial: "G"
+        initial: "G",
+        instance: null // MapLibre Marker referansı burada tutulacak
     },
     {
         id: "rightNode",
         markerType: "grey-letter-dot",
-        initial: "M"
+        initial: "M",
+        instance: null
     },
     {
         id: "mainNode",
-        markerType: "blue-pulse-dot"
+        markerType: "blue-pulse-dot",
+        instance: null
     }
 ];
 
@@ -94,13 +97,56 @@ function createMarkerElement(person) {
 
 function initMarkers() {
     people.forEach(person => {
-        new maplibregl.Marker({
+        person.instance = new maplibregl.Marker({
             element: createMarkerElement(person),
             anchor: "center"
         })
         .setLngLat(positions[person.id])
         .addTo(map);
     });
+
+    // Harita yüklendikten veya markerlar oluştuktan sonra yörünge animasyonunu başlat
+    requestAnimationFrame(animateOrbit);
+}
+
+// ============================
+// REAL-SCALE ORBIT ANIMATION ENGINE (100 m² ALAN)
+// ============================
+// 100 metrekarelik bir çember alanı için r = ~5.64 metrelik bir yarıçap gerekir.
+// Dünya üzerindeki enlem/boylam derecelerini metreye çeviren sabit çarpanlar:
+const EARTH_RADIUS_METERS = 6378137;
+const LAT_TO_METERS = (Math.PI * EARTH_RADIUS_METERS) / 180; // 1 derece enlemin metre karşılığı (~111319m)
+
+// Aktörlerin hız dengesi: Çok yavaş olmaları istendiği için zaman çarpanı oldukça düşük tutulmuştur.
+let angle = 0;
+const orbitSpeed = 0.002; // Hızı değiştirmek istersen bu değeri azaltıp artırabilirsin
+
+function animateOrbit() {
+    angle += orbitSpeed;
+
+    people.forEach(person => {
+        if (!person.instance) return;
+
+        // Her aktörün kendi orijinal merkez koordinatları
+        const centerLng = positions[person.id][0];
+        const centerLat = positions[person.id][1];
+
+        // 100 metrekare alanı tam turlayacak gerçek yarıçap hesabı (~5.64 metre)
+        const radiusMeters = 5.64; 
+
+        // Bulunulan enleme göre boylam derecesinin metre karşılığı (cosinus düzeltmesi)
+        const lngToMeters = LAT_TO_METERS * Math.cos(centerLat * Math.PI / 180);
+
+        // Metre cinsinden dairesel sapmanın koordinat (derece) cinsine çevrilmesi
+        const deltaLat = (radiusMeters * Math.sin(angle)) / LAT_TO_METERS;
+        const deltaLng = (radiusMeters * Math.cos(angle)) / lngToMeters;
+
+        // Yeni dinamik konumları set et
+        person.instance.setLngLat([centerLng + deltaLng, centerLat + deltaLat]);
+    });
+
+    // Sonsuz döngü tetikleyicisi
+    requestAnimationFrame(animateOrbit);
 }
 
 // Render stationary configuration fields immediately

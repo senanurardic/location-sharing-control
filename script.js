@@ -6,9 +6,9 @@ const map = new maplibregl.Map({
     style: 'https://tiles.openfreemap.org/styles/liberty',
     // Symmetrically calculated center matching your custom KML geometry bounds
     center: [9.2123, 45.4824], 
-    zoom: 14.5,                
-    minZoom: 14.5,             
-    maxZoom: 14.5,             
+    zoom: 12.5,                
+    minZoom: 12.5,             
+    maxZoom: 12.5,             
     
     // EXPERIMENTAL CONTROLS: FIXED VIEWPORT MATRIX
     dragPan: false,            

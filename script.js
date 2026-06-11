@@ -110,7 +110,7 @@ function initMarkers() {
 }
 
 // ============================
-// REAL-SCALE ORBIT ANIMATION ENGINE (Genişletilmiş Çap)
+// REAL-SCALE ORBIT ANIMATION
 // ============================
 const EARTH_RADIUS_METERS = 6378137;
 const LAT_TO_METERS = (Math.PI * EARTH_RADIUS_METERS) / 180; 
@@ -129,7 +129,7 @@ function animateOrbit() {
         const centerLat = positions[person.id][1];
 
         // Genişletilmiş Çap: Hareketin rahatça seçilebilmesi için gerçek dünyada 56.4 metre yarıçap tanımlandı.
-        const radiusMeters = 56.4; 
+        const radiusMeters = 50.0; 
 
         const lngToMeters = LAT_TO_METERS * Math.cos(centerLat * Math.PI / 180);
 

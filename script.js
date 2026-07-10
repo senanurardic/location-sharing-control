@@ -1,13 +1,13 @@
 // ============================
-// CALIBRATED MAP CONFIGURATION (ZOOM 13.0)
+// CALIBRATED MAP CONFIGURATION (ZOOM 13.9)
 // ============================
 const map = new maplibregl.Map({
     container: 'map',
     style: 'https://tiles.openfreemap.org/styles/liberty',
     center: [9.2123, 45.4824], 
-    zoom: 13.0,                
-    minZoom: 13.0,             
-    maxZoom: 13.0,             
+    zoom: 13.9,                
+    minZoom: 13.9,             
+    maxZoom: 13.9,             
     
     // EXPERIMENTAL CONTROLS: FIXED VIEWPORT MATRIX
     dragPan: false,            
@@ -33,7 +33,7 @@ map.on('style.load', () => {
 const positions = {
     leftNode:  [9.203801, 45.483950], // Top-Left Vertex ("G") 
     rightNode: [9.216763, 45.486383], // Top-Right Vertex ("M") 
-    mainNode:  [9.217046, 45.476790]  // Main Bottom Vertex (Blue Pulse - TAMAMEN SABİT) 
+    mainNode:  [9.217046, 45.476790]  // Main Bottom Vertex (Blue Pulse - STABLE) 
 };
 
 // ============================
@@ -114,21 +114,22 @@ const radiusMeters = 50.0;
 const orbitSpeed = 0.004; 
 
 let startTime = null;
-const TOTAL_END_TIME = 130; // 10s sabit bekleme + 120s dairesel hareket = 130s total bitiş
+const DELAY_DURATION = 5; // 5 saniye sabit bekleme
+const TOTAL_END_TIME = 30; // 5s sabit bekleme + 25s dairesel hareket = 30s total bitiş
 
 function animateOrbit(timestamp) {
     if (!startTime) startTime = timestamp;
     const elapsedSeconds = (timestamp - startTime) / 1000;
 
-    // 1. Durum: İlk 10 saniye tüm aktörler başlangıç konumunda milimetrik sabit bekler
-    if (elapsedSeconds < 10) {
+    // 1. Durum: İlk 5 saniye tüm aktörler başlangıç konumunda milimetrik sabit bekler
+    if (elapsedSeconds < DELAY_DURATION) {
         people.forEach(person => {
             if (person.instance) person.instance.setLngLat(positions[person.id]);
         });
     }
-    // 2. Durum: 10 ile 130. saniyeler arası sadece G ve M pürüzsüzce dairesel yörüngeye girer
-    else if (elapsedSeconds >= 10 && elapsedSeconds <= TOTAL_END_TIME) {
-        const activeSeconds = elapsedSeconds - 10;
+    // 2. Durum: 5 ile 30. saniyeler arası sadece G ve M pürüzsüzce dairesel yörüngeye girer
+    else if (elapsedSeconds >= DELAY_DURATION && elapsedSeconds <= TOTAL_END_TIME) {
+        const activeSeconds = elapsedSeconds - DELAY_DURATION;
         const currentAngle = (activeSeconds * 60 * orbitSpeed); 
 
         people.forEach(person => {
@@ -151,9 +152,9 @@ function animateOrbit(timestamp) {
             person.instance.setLngLat([centerLng + deltaLng, centerLat + deltaLat]);
         });
     }
-    // 3. Durum: 130. saniyede en son konumlarında donarlar ve işlem biter
+    // 3. Durum: 30. saniyede en son konumlarında donarlar ve işlem biter
     else if (elapsedSeconds > TOTAL_END_TIME) {
-        const finalActiveSeconds = TOTAL_END_TIME - 10;
+        const finalActiveSeconds = TOTAL_END_TIME - DELAY_DURATION;
         const finalAngle = (finalActiveSeconds * 60 * orbitSpeed);
 
         people.forEach(person => {

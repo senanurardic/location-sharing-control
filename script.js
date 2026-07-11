@@ -1,13 +1,13 @@
 // ============================
-// CALIBRATED MAP CONFIGURATION (ZOOM 13.9)
+// CALIBRATED MAP CONFIGURATION (ZOOM 13.6)
 // ============================
 const map = new maplibregl.Map({
     container: 'map',
     style: 'https://tiles.openfreemap.org/styles/liberty',
     center: [9.2123, 45.4824], 
-    zoom: 13.9,                
-    minZoom: 13.9,             
-    maxZoom: 13.9,             
+    zoom: 13.6,                
+    minZoom: 13.6,             
+    maxZoom: 13.6,             
     
     // EXPERIMENTAL CONTROLS: FIXED VIEWPORT MATRIX
     dragPan: false,            
@@ -152,7 +152,7 @@ function animateOrbit(timestamp) {
             person.instance.setLngLat([centerLng + deltaLng, centerLat + deltaLat]);
         });
     }
-    // 3. Durum: 30. saniyede en son konumlarında donarlar ve işlem biter
+    // 3. Durum: Stable after 30 seconds
     else if (elapsedSeconds > TOTAL_END_TIME) {
         const finalActiveSeconds = TOTAL_END_TIME - DELAY_DURATION;
         const finalAngle = (finalActiveSeconds * 60 * orbitSpeed);
@@ -181,14 +181,13 @@ function animateOrbit(timestamp) {
 }
 
 // ============================
-// ASYNC LOAD GUARD (ÇİFT KONTROL MEKANİZMASI)
+// ASYNC LOAD GUARD (DOUBLE CHECK MECHANISM)
 // ============================
 function runEngine() {
     initMarkers();
     requestAnimationFrame(animateOrbit);
 }
 
-// Harita henüz yüklenmediyse olayı bekle, çoktan yüklendiyse doğrudan çalıştır
 if (map.loaded()) {
     runEngine();
 } else {
